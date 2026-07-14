@@ -9,7 +9,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
 };
 
 export const getProductById = async (req: Request, res: Response) => {
-  const product = await productService.getById(req.params.id);
+  const product = await productService.getById(req.params.id as string);
   sendSuccess(res, product);
 };
 
@@ -20,15 +20,15 @@ export const createProduct = async (req: Request, res: Response) => {
 };
 
 export const updateProduct = async (req: Request, res: Response) => {
-  const oldProduct = await productService.getById(req.params.id);
-  const product = await productService.update(req.params.id, req.body, req.file);
+  const oldProduct = await productService.getById(req.params.id as string);
+  const product = await productService.update(req.params.id as string, req.body, req.file);
   req.audit?.('UPDATE', 'Product', product.id, oldProduct, product);
   sendSuccess(res, product, 'Product updated successfully');
 };
 
 export const deleteProduct = async (req: Request, res: Response) => {
-  const oldProduct = await productService.getById(req.params.id);
-  await productService.delete(req.params.id);
-  req.audit?.('DELETE', 'Product', req.params.id, oldProduct);
+  const oldProduct = await productService.getById(req.params.id as string);
+  await productService.delete(req.params.id as string);
+  req.audit?.('DELETE', 'Product', req.params.id as string, oldProduct);
   sendSuccess(res, null, 'Product deleted (or discontinued)');
 };

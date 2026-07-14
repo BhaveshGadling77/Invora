@@ -9,7 +9,7 @@ export const getAllCustomers = async (req: Request, res: Response) => {
 };
 
 export const getCustomerById = async (req: Request, res: Response) => {
-  const customer = await customerService.getById(req.params.id);
+  const customer = await customerService.getById(req.params.id as string);
   sendSuccess(res, customer);
 };
 
@@ -20,15 +20,15 @@ export const createCustomer = async (req: Request, res: Response) => {
 };
 
 export const updateCustomer = async (req: Request, res: Response) => {
-  const oldCustomer = await customerService.getById(req.params.id);
-  const customer = await customerService.update(req.params.id, req.body);
+  const oldCustomer = await customerService.getById(req.params.id as string);
+  const customer = await customerService.update(req.params.id as string, req.body);
   req.audit?.('UPDATE', 'Customer', customer.id, oldCustomer, customer);
   sendSuccess(res, customer, 'Customer updated successfully');
 };
 
 export const deleteCustomer = async (req: Request, res: Response) => {
-  const oldCustomer = await customerService.getById(req.params.id);
-  await customerService.delete(req.params.id);
-  req.audit?.('DELETE', 'Customer', req.params.id, oldCustomer);
+  const oldCustomer = await customerService.getById(req.params.id as string);
+  await customerService.delete(req.params.id as string);
+  req.audit?.('DELETE', 'Customer', req.params.id as string, oldCustomer);
   sendSuccess(res, null, 'Customer deleted successfully');
 };

@@ -9,7 +9,7 @@ export const getAllSales = async (req: Request, res: Response) => {
 };
 
 export const getSaleById = async (req: Request, res: Response) => {
-  const sale = await saleService.getById(req.params.id);
+  const sale = await saleService.getById(req.params.id as string);
   sendSuccess(res, sale);
 };
 

@@ -8,6 +8,7 @@ import purchaseRoutes from './purchase.routes';
 import saleRoutes from './sale.routes';
 import inventoryRoutes from './inventory.routes';
 import dashboardRoutes from './dashboard.routes';
+import reportRoutes from './report.routes';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/purchases', purchaseRoutes);
 router.use('/sales', saleRoutes);
 router.use('/inventory', inventoryRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/reports', reportRoutes);
 
 export default router;

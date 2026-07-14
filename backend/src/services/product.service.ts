@@ -86,8 +86,9 @@ export class ProductService {
         ...data,
         imageUrl,
         imagePublicId,
-        // Calculate initial stock status based on current vs minimum
-        stockStatus: data.currentStock === 0 ? 'OUT_OF_STOCK' : (data.currentStock <= data.minimumStock ? 'LOW_STOCK' : 'IN_STOCK')
+        ...(data.currentStock !== undefined && data.minimumStock !== undefined && {
+          stockStatus: Number(data.currentStock) === 0 ? 'OUT_OF_STOCK' : (Number(data.currentStock) <= Number(data.minimumStock) ? 'LOW_STOCK' : 'IN_STOCK')
+        })
       },
     });
   }

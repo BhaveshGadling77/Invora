@@ -9,7 +9,7 @@ export const getAllCategories = async (req: Request, res: Response) => {
 };
 
 export const getCategoryById = async (req: Request, res: Response) => {
-  const category = await categoryService.getById(req.params.id);
+  const category = await categoryService.getById(req.params.id as string);
   sendSuccess(res, category);
 };
 
@@ -20,15 +20,15 @@ export const createCategory = async (req: Request, res: Response) => {
 };
 
 export const updateCategory = async (req: Request, res: Response) => {
-  const oldCategory = await categoryService.getById(req.params.id);
-  const category = await categoryService.update(req.params.id, req.body);
+  const oldCategory = await categoryService.getById(req.params.id as string);
+  const category = await categoryService.update(req.params.id as string, req.body);
   req.audit?.('UPDATE', 'Category', category.id, oldCategory, category);
   sendSuccess(res, category, 'Category updated successfully');
 };
 
 export const deleteCategory = async (req: Request, res: Response) => {
-  const oldCategory = await categoryService.getById(req.params.id);
-  await categoryService.delete(req.params.id);
-  req.audit?.('DELETE', 'Category', req.params.id, oldCategory);
+  const oldCategory = await categoryService.getById(req.params.id as string);
+  await categoryService.delete(req.params.id as string);
+  req.audit?.('DELETE', 'Category', req.params.id as string, oldCategory);
   sendSuccess(res, null, 'Category deleted successfully');
 };

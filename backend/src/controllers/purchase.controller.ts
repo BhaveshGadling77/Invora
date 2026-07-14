@@ -9,7 +9,7 @@ export const getAllPurchases = async (req: Request, res: Response) => {
 };
 
 export const getPurchaseById = async (req: Request, res: Response) => {
-  const purchase = await purchaseService.getById(req.params.id);
+  const purchase = await purchaseService.getById(req.params.id as string);
   sendSuccess(res, purchase);
 };
 

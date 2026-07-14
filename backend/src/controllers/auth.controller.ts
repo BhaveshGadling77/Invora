@@ -40,7 +40,7 @@ export const refresh = async (req: Request, res: Response) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  sendSuccess(res, { accessToken: result.accessToken }, 'Token refreshed');
+  return sendSuccess(res, { accessToken: result.accessToken }, 'Token refreshed');
 };
 
 export const logout = async (req: Request, res: Response) => {
@@ -60,7 +60,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
     return sendError(res, 'Token is required', 400);
   }
   await authService.verifyEmail(token);
-  sendSuccess(res, null, 'Email verified successfully');
+  return sendSuccess(res, null, 'Email verified successfully');
 };
 
 export const forgotPassword = async (req: Request, res: Response) => {

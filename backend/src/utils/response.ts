@@ -1,5 +1,7 @@
-import { ApiResponse, PaginationMeta } from '../types';
+import { ApiResponse, PaginationMeta, PaginationQuery } from '../types';
 import { Response } from 'express';
+
+export { PaginationQuery };
 
 /**
  * Standardized API response helpers.
@@ -49,7 +51,7 @@ export const buildPaginationMeta = (
 });
 
 export const parsePagination = (
-  query: Record<string, string | undefined>,
+  query: any,
 ): { page: number; limit: number; skip: number } => {
   const page = Math.max(1, parseInt(query.page || '1', 10));
   const limit = Math.min(100, Math.max(1, parseInt(query.limit || '10', 10)));

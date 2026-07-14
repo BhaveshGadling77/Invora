@@ -9,7 +9,7 @@ export const getAllSuppliers = async (req: Request, res: Response) => {
 };
 
 export const getSupplierById = async (req: Request, res: Response) => {
-  const supplier = await supplierService.getById(req.params.id);
+  const supplier = await supplierService.getById(req.params.id as string);
   sendSuccess(res, supplier);
 };
 
@@ -20,15 +20,15 @@ export const createSupplier = async (req: Request, res: Response) => {
 };
 
 export const updateSupplier = async (req: Request, res: Response) => {
-  const oldSupplier = await supplierService.getById(req.params.id);
-  const supplier = await supplierService.update(req.params.id, req.body);
+  const oldSupplier = await supplierService.getById(req.params.id as string);
+  const supplier = await supplierService.update(req.params.id as string, req.body);
   req.audit?.('UPDATE', 'Supplier', supplier.id, oldSupplier, supplier);
   sendSuccess(res, supplier, 'Supplier updated successfully');
 };
 
 export const deleteSupplier = async (req: Request, res: Response) => {
-  const oldSupplier = await supplierService.getById(req.params.id);
-  await supplierService.delete(req.params.id);
-  req.audit?.('DELETE', 'Supplier', req.params.id, oldSupplier);
+  const oldSupplier = await supplierService.getById(req.params.id as string);
+  await supplierService.delete(req.params.id as string);
+  req.audit?.('DELETE', 'Supplier', req.params.id as string, oldSupplier);
   sendSuccess(res, null, 'Supplier deleted successfully');
 };

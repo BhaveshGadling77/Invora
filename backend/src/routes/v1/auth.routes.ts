@@ -21,7 +21,7 @@ router.post('/forgot-password', forgotPasswordValidator, validate, asyncHandler(
 router.post('/reset-password', resetPasswordValidator, validate, asyncHandler(authController.resetPassword));
 
 // Get current user (protected)
-router.get('/me', authenticate, (req, res) => {
+router.get('/me', authenticate, (req: any, res) => {
   res.json({ success: true, data: req.user });
 });
 

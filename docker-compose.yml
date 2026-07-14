@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  database:
+    image: mysql:8.0
+    container_name: inventra_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: inventra
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - inventra_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inventra_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DATABASE_URL=mysql://root:rootpassword@database:3306/inventra
+      - JWT_SECRET=super_secret_jwt_key_inventra
+      - JWT_EXPIRES_IN=1d
+      - JWT_REFRESH_EXPIRES_IN=7d
+      # Add cloudinary/email env vars here
+    depends_on:
+      - database
+    networks:
+      - inventra_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: inventra_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - inventra_network
+
+volumes:
+  db_data:
+
+networks:
+  inventra_network:
+    driver: bridge

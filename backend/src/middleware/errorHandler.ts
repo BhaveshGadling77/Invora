@@ -62,7 +62,7 @@ export const errorHandler = (
 
   // Prisma unique constraint violation
   if (err.constructor.name === 'PrismaClientKnownRequestError') {
-    const prismaError = err as { code: string; meta?: { target?: string[] } };
+    const prismaError = err as unknown as { code: string; meta?: { target?: string[] } };
     if (prismaError.code === 'P2002') {
       const field = prismaError.meta?.target?.[0] || 'field';
       sendError(res, `A record with this ${field} already exists`, 409);
@@ -86,7 +86,7 @@ export const errorHandler = (
 
   // Multer file size error
   if (err.name === 'MulterError') {
-    const multerErr = err as { code: string };
+    const multerErr = err as unknown as { code: string };
     if (multerErr.code === 'LIMIT_FILE_SIZE') {
       sendError(res, 'File size too large. Max 5MB allowed.', 400);
       return;
@@ -107,7 +107,7 @@ export const notFoundHandler = (req: Request, res: Response): void => {
 // ─── Async Handler Wrapper ────────────────────────────────────────────────────
 // Eliminates try/catch boilerplate in controllers
 
-type AsyncFn = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+type AsyncFn = (req: Request, res: Response, next: NextFunction) => Promise<any>;
 
 export const asyncHandler =
   (fn: AsyncFn) =>
