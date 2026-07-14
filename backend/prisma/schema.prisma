@@ -1,0 +1,439 @@
+// Inventra - Enterprise Inventory Management System
+// Prisma Schema - MySQL
+// 3NF Normalized Database Design
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// AUTH & USERS
+// ─────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model User {
+  id                    String     @id @default(uuid())
+  name                  String     @db.VarChar(100)
+  email                 String     @unique @db.VarChar(150)
+  password              String     @db.VarChar(255)
+  role                  Role       @default(STAFF)
+  status                UserStatus @default(ACTIVE)
+  avatar                String?    @db.VarChar(500)
+  isEmailVerified       Boolean    @default(false)
+  emailVerificationToken String?   @db.VarChar(255)
+  emailVerificationExpiry DateTime?
+  passwordResetToken    String?    @db.VarChar(255)
+  passwordResetExpiry   DateTime?
+  lastLoginAt           DateTime?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  // Relations
+  refreshTokens  RefreshToken[]
+  auditLogs      AuditLog[]
+  sales          Sale[]
+  purchases      Purchase[]
+  stockAdjustments StockAdjustment[]
+  notifications  Notification[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique @db.VarChar(500)
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────
+// CATEGORIES
+// ─────────────────────────────────────────────
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  color       String?  @db.VarChar(7)   // hex color for UI
+  icon        String?  @db.VarChar(50)  // icon name
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@index([name])
+  @@map("categories")
+}
+
+// ─────────────────────────────────────────────
+// SUPPLIERS
+// ─────────────────────────────────────────────
+
+enum SupplierStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Supplier {
+  id            String         @id @default(uuid())
+  companyName   String         @db.VarChar(150)
+  contactPerson String         @db.VarChar(100)
+  email         String         @unique @db.VarChar(150)
+  phone         String         @db.VarChar(20)
+  gstNumber     String?        @db.VarChar(20)
+  address       String?        @db.Text
+  city          String?        @db.VarChar(100)
+  state         String?        @db.VarChar(100)
+  country       String?        @db.VarChar(100)
+  pincode       String?        @db.VarChar(10)
+  status        SupplierStatus @default(ACTIVE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  products  Product[]
+  purchases Purchase[]
+
+  @@index([companyName])
+  @@index([email])
+  @@map("suppliers")
+}
+
+// ─────────────────────────────────────────────
+// CUSTOMERS
+// ─────────────────────────────────────────────
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Customer {
+  id          String         @id @default(uuid())
+  name        String         @db.VarChar(150)
+  email       String?        @unique @db.VarChar(150)
+  phone       String         @db.VarChar(20)
+  gstNumber   String?        @db.VarChar(20)
+  address     String?        @db.Text
+  city        String?        @db.VarChar(100)
+  state       String?        @db.VarChar(100)
+  country     String?        @db.VarChar(100)
+  pincode     String?        @db.VarChar(10)
+  status      CustomerStatus @default(ACTIVE)
+  totalOrders Int            @default(0)
+  totalSpent  Decimal        @default(0) @db.Decimal(12, 2)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  sales Sale[]
+
+  @@index([email])
+  @@index([phone])
+  @@map("customers")
+}
+
+// ─────────────────────────────────────────────
+// PRODUCTS
+// ─────────────────────────────────────────────
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  DISCONTINUED
+}
+
+enum StockStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
+model Product {
+  id            String        @id @default(uuid())
+  name          String        @db.VarChar(200)
+  sku           String        @unique @db.VarChar(50)
+  barcode       String?       @unique @db.VarChar(100)
+  description   String?       @db.Text
+  categoryId    String
+  supplierId    String?
+  purchasePrice Decimal       @db.Decimal(10, 2)
+  sellingPrice  Decimal       @db.Decimal(10, 2)
+  currentStock  Int           @default(0)
+  minimumStock  Int           @default(10)
+  unit          String        @db.VarChar(20) // pcs, kg, liters, etc.
+  imageUrl      String?       @db.VarChar(500)
+  imagePublicId String?       @db.VarChar(255) // Cloudinary public_id
+  status        ProductStatus @default(ACTIVE)
+  stockStatus   StockStatus   @default(IN_STOCK)
+  tax           Decimal       @default(0) @db.Decimal(5, 2) // tax percentage
+  discount      Decimal       @default(0) @db.Decimal(5, 2)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  category Category @relation(fields: [categoryId], references: [id])
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+
+  saleItems     SaleItem[]
+  purchaseItems PurchaseItem[]
+  stockAdjustments StockAdjustment[]
+  inventoryHistory InventoryHistory[]
+
+  @@index([sku])
+  @@index([barcode])
+  @@index([categoryId])
+  @@index([supplierId])
+  @@index([stockStatus])
+  @@index([status])
+  @@map("products")
+}
+
+// ─────────────────────────────────────────────
+// PURCHASES
+// ─────────────────────────────────────────────
+
+enum PurchaseStatus {
+  PENDING
+  RECEIVED
+  PARTIAL
+  CANCELLED
+}
+
+model Purchase {
+  id             String         @id @default(uuid())
+  purchaseNumber String         @unique @db.VarChar(20)
+  supplierId     String
+  userId         String
+  status         PurchaseStatus @default(PENDING)
+  totalAmount    Decimal        @db.Decimal(12, 2)
+  taxAmount      Decimal        @default(0) @db.Decimal(12, 2)
+  discountAmount Decimal        @default(0) @db.Decimal(12, 2)
+  netAmount      Decimal        @db.Decimal(12, 2)
+  notes          String?        @db.Text
+  purchaseDate   DateTime       @default(now())
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  supplier Supplier      @relation(fields: [supplierId], references: [id])
+  user     User          @relation(fields: [userId], references: [id])
+  items    PurchaseItem[]
+
+  @@index([supplierId])
+  @@index([purchaseNumber])
+  @@index([purchaseDate])
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id          String  @id @default(uuid())
+  purchaseId  String
+  productId   String
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(10, 2)
+  totalPrice  Decimal @db.Decimal(10, 2)
+  receivedQty Int     @default(0)
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id])
+
+  @@index([purchaseId])
+  @@index([productId])
+  @@map("purchase_items")
+}
+
+// ─────────────────────────────────────────────
+// SALES
+// ─────────────────────────────────────────────
+
+enum SaleStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PAID
+  PARTIAL
+  UNPAID
+}
+
+model Sale {
+  id             String        @id @default(uuid())
+  invoiceNumber  String        @unique @db.VarChar(20)
+  customerId     String?
+  userId         String
+  status         SaleStatus    @default(COMPLETED)
+  paymentMethod  PaymentMethod @default(CASH)
+  paymentStatus  PaymentStatus @default(PAID)
+  subtotal       Decimal       @db.Decimal(12, 2)
+  taxAmount      Decimal       @default(0) @db.Decimal(12, 2)
+  discountAmount Decimal       @default(0) @db.Decimal(12, 2)
+  totalAmount    Decimal       @db.Decimal(12, 2)
+  amountPaid     Decimal       @default(0) @db.Decimal(12, 2)
+  balanceDue     Decimal       @default(0) @db.Decimal(12, 2)
+  notes          String?       @db.Text
+  saleDate       DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  customer Customer? @relation(fields: [customerId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
+  items    SaleItem[]
+
+  @@index([customerId])
+  @@index([invoiceNumber])
+  @@index([saleDate])
+  @@index([status])
+  @@map("sales")
+}
+
+model SaleItem {
+  id         String  @id @default(uuid())
+  saleId     String
+  productId  String
+  quantity   Int
+  unitPrice  Decimal @db.Decimal(10, 2)
+  discount   Decimal @default(0) @db.Decimal(5, 2)
+  totalPrice Decimal @db.Decimal(10, 2)
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
+}
+
+// ─────────────────────────────────────────────
+// INVENTORY
+// ─────────────────────────────────────────────
+
+enum AdjustmentType {
+  ADD
+  REMOVE
+  DAMAGE
+  RETURN
+  CORRECTION
+}
+
+model StockAdjustment {
+  id         String         @id @default(uuid())
+  productId  String
+  userId     String
+  type       AdjustmentType
+  quantity   Int
+  reason     String         @db.VarChar(500)
+  previousStock Int
+  newStock   Int
+  createdAt  DateTime       @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("stock_adjustments")
+}
+
+model InventoryHistory {
+  id        String   @id @default(uuid())
+  productId String
+  action    String   @db.VarChar(50) // PURCHASE, SALE, ADJUSTMENT
+  refId     String?  @db.VarChar(36) // reference to purchase/sale id
+  quantity  Int      // positive = in, negative = out
+  balance   Int      // stock after this transaction
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("inventory_history")
+}
+
+// ─────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────
+
+enum NotificationType {
+  LOW_STOCK
+  OUT_OF_STOCK
+  NEW_SUPPLIER
+  NEW_PURCHASE
+  SALE_CREATED
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  title     String           @db.VarChar(200)
+  message   String           @db.Text
+  isRead    Boolean          @default(false)
+  data      Json?            // extra payload
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────────
+// AUDIT LOGS
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  action     String   @db.VarChar(100)
+  entity     String   @db.VarChar(50)
+  entityId   String?  @db.VarChar(36)
+  oldValues  Json?
+  newValues  Json?
+  ipAddress  String?  @db.VarChar(45)
+  userAgent  String?  @db.VarChar(500)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

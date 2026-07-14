@@ -1,0 +1,21 @@
+{
+  "name": "inventra-backend",
+  "version": "1.0.0",
+  "description": "Inventra - Enterprise Inventory Management System Backend",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:push": "prisma db push",
+    "prisma:seed": "tsx src/utils/seed.ts",
+    "prisma:studio": "prisma studio",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": ["inventory", "management", "enterprise"],
+  "author": "Inventra",
+  "license": "MIT"
+}
