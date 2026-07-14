@@ -2,6 +2,13 @@
 
 Inventra is a production-ready, highly scalable, full-stack Enterprise Inventory Management System built for modern businesses. It includes robust features like real-time dashboards, automated stock tracking, full supply chain management (purchases/sales), dynamic reports, and role-based access control.
 
+## Internship Details
+
+- **Full Name:** Bhavesh Gadling
+- **Intern ID:** CITS5077
+- **Duration:** 6 Weeks
+- **Project Name:** Inventra - Enterprise Inventory Management System
+
 ## Tech Stack
 
 ### Frontend
