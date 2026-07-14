@@ -15,7 +15,18 @@
     "lint": "eslint src --ext .ts",
     "format": "prettier --write src/**/*.ts"
   },
-  "keywords": ["inventory", "management", "enterprise"],
+  "keywords": [
+    "inventory",
+    "management",
+    "enterprise"
+  ],
   "author": "Inventra",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "prisma": "^5.22.0"
+  }
 }
